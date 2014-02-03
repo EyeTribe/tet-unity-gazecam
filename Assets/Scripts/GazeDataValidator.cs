@@ -39,7 +39,7 @@ namespace Assets.Scripts
         {
             _Frames.Enqueue(frame);
 
-            //update valid gazedata based on store
+            // update valid gazedata based on store
             Eye right = null, left = null;
             Point2D gazeCoords = null;
             Point2D gazeCoordsSmooth = null;
@@ -47,6 +47,8 @@ namespace Assets.Scripts
             for (int i = _Frames.Count; --i >= 0; )
             {
                 gd = _Frames.ElementAt(i);
+
+                // if no tracking problems, then cache eye data
                 if ((gd.State & GazeData.STATE_TRACKING_FAIL) == 0 && (gd.State & GazeData.STATE_TRACKING_LOST) == 0)
                 {
                     if (null == left && null != gd.LeftEye && gd.LeftEye.PupilCenterCoordinates.X != 0 && gd.LeftEye.PupilCenterCoordinates.Y != 0)
@@ -55,14 +57,15 @@ namespace Assets.Scripts
                         right = gd.RightEye;
                 }
 
-                if ((gd.State & GazeData.STATE_TRACKING_GAZE) != 0 && null == gazeCoords && gd.RawCoordinates.X != 0 && gd.RawCoordinates.Y != 0)
+                // if gaze coordinates available, cache both raw and smoothed
+                if (/*(gd.State & GazeData.STATE_TRACKING_GAZE) != 0 && */null == gazeCoords && gd.RawCoordinates.X != 0 && gd.RawCoordinates.Y != 0)
                 {
                     gazeCoords = gd.RawCoordinates;
                     gazeCoordsSmooth = gd.SmoothedCoordinates;
                 }
-                    gazeCoords = gd.RawCoordinates;
 
-                if (null != right && null != left)
+                // break loop if valid values found
+                if (null != right && null != left && null != gazeCoords)
                     break;    
             }
 
@@ -78,6 +81,7 @@ namespace Assets.Scripts
                 _LastValidSmoothedGazeCoords = gazeCoordsSmooth;
             }
 
+            //Update user position values if needed data is valid
             if (null != _LastValidLeftEye && null != _LastValidRightEye)
             {
                 //update user position

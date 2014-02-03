@@ -15,15 +15,13 @@ namespace Assets.Scripts
         /// Note that gaze points have origo in top left corner, whilst Unity uses lower left.
         /// </summary>
         /// <param name="gp"/>gaze point to map</param>
-        /// <param name="currentDisplay"/>the current Unity window size to map to</param>
         /// <returns>2d point mapped to unity window space</returns>
-        public static Point2D getGazeCoordsToUnityWindowCoords(Point2D gp, Resolution currentDisplay)
+        public static Point2D getGazeCoordsToUnityWindowCoords(Point2D gp)
         {
-            //Unity coords have origo in bottom-left corner
-            double rx = gp.X / currentDisplay.width;
-            double ry = (currentDisplay.height - gp.Y) / currentDisplay.height;
+            double rx = gp.X * ((double)Screen.width / GazeManager.Instance.ScreenResolutionWidth);
+            double ry = (GazeManager.Instance.ScreenResolutionHeight - gp.Y) * ((double)Screen.height / GazeManager.Instance.ScreenResolutionHeight);
 
-            return new Point2D(rx * Screen.width, ry * Screen.height);
+            return new Point2D(rx, ry);
         }
 
         /// <summary>
