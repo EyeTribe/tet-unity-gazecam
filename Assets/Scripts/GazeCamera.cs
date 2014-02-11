@@ -3,6 +3,7 @@ using System.Collections;
 using TETCSharpClient;
 using TETCSharpClient.Data;
 using Assets.Scripts;
+using Filter.Utils;
 
 /// <summary>
 /// Component attached to 'Main Camera' of '/Scenes/std_scene.unity'.
@@ -16,6 +17,9 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private double eyesDistance;
     private double baseDist;
     private double depthMod;
+
+	private MotionFilter filteredPoseLeftEye;
+	private MotionFilter filteredPoseRightEye;
 
     private Component gazeIndicator; 
 
@@ -34,6 +38,10 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
+
+		// Initializing the head pose filtering
+		filteredPoseLeftEye = new MotionFilter(1, 1, 3);
+		filteredPoseRightEye = new MotionFilter(1, 1, 3);
 
         //register for gaze updates
         GazeManager.Instance.AddGazeListener(this);
@@ -65,7 +73,33 @@ public class GazeCamera : MonoBehaviour, IGazeListener
                 (float)(baseDist + depthMod));
             cam.transform.position = newPos;
 
-            //camera 'look at' origo
+			// Update the MotionFilter for both eyes
+			double []newPose = new double[3];
+			double []correctedPose;
+
+			userPos = gazeUtils.GetLastValidLeftEyePosition();
+			// TODO : do a proper retroprojection here !
+			tx = (userPos.X * 5) - 2.5f;
+			ty = (userPos.Y * 3) - 1.5f;
+			newPose[0] = tx;
+			newPose[1] = ty;
+			newPose[2] = baseDist + depthMod;
+			
+			filteredPoseLeftEye.Predict();
+			filteredPoseLeftEye.Correct(newPose,3);
+			filteredPoseLeftEye.GetPostState(out correctedPose);
+
+			userPos = gazeUtils.GetLastValidRightEyePosition();
+			// TODO : do a proper retroprojection here !
+			tx = (userPos.X * 5) - 2.5f;
+			ty = (userPos.Y * 3) - 1.5f;
+			newPose[0] = tx;
+			newPose[1] = ty;
+			filteredPoseRightEye.Predict();
+			filteredPoseRightEye.Correct(newPose,3);
+			filteredPoseRightEye.GetPostState(out correctedPose);
+
+			//camera 'look at' origo
             cam.transform.LookAt(Vector3.zero);
 
             //tilt cam according to eye angle
@@ -78,9 +112,10 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         if (null != gazeCoords)
         {
             //map gaze indicator
-            Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords, Screen.currentResolution);
-
-            Vector3 screenPoint = new Vector3((float)gp.X, (float)gp.Y, cam.nearClipPlane + .1f);
+//            Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords, Screen.currentResolution);
+			Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords);
+			
+			Vector3 screenPoint = new Vector3((float)gp.X, (float)gp.Y, cam.nearClipPlane + .1f);
 
             Vector3 planeCoord = cam.ScreenToWorldPoint(screenPoint);
             gazeIndicator.transform.position = planeCoord;

@@ -24,8 +24,9 @@ namespace Assets.Scripts
 
         private Point2D _LastValidRawGazeCoords;
         private Point2D _LastValidSmoothedGazeCoords;
-        private Point2D _LastValidUserPosition;
 
+        private Point2D _LastValidUserPosition;
+		
         private double _LastValidEyeDistance;
         private double _LastValidEyeAngle;
 
@@ -89,6 +90,7 @@ namespace Assets.Scripts
                 {
                     _LastValidUserPosition.X = (_LastValidLeftEye.PupilCenterCoordinates.X + _LastValidRightEye.PupilCenterCoordinates.X) / 2;
                     _LastValidUserPosition.Y = (_LastValidLeftEye.PupilCenterCoordinates.Y + _LastValidRightEye.PupilCenterCoordinates.Y) / 2;
+
                 }
 
                 //update 'depth' measure
@@ -117,6 +119,17 @@ namespace Assets.Scripts
         {
             return _LastValidUserPosition;
         }
+
+		public Point2D GetLastValidLeftEyePosition() {
+			// TODO : check for a memory leak here !
+			return new Point2D(_LastValidLeftEye.PupilCenterCoordinates.X, _LastValidLeftEye.PupilCenterCoordinates.Y);
+		}
+
+		public Point2D GetLastValidRightEyePosition() {
+			// TODO : check for a memory leak here !
+			return new Point2D(_LastValidRightEye.PupilCenterCoordinates.X, _LastValidRightEye.PupilCenterCoordinates.Y);
+		}
+
 
         public Eye GetLastValidLeftEye()
         {
