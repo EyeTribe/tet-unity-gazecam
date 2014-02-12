@@ -53,51 +53,38 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         gazeUtils.Update(gazeData);
     }
 
+
 	void Update ()
     {
         Point2D userPos = gazeUtils.GetLastValidUserPosition();
 
         if (null != userPos)
         {
-            //mapping cam panning to 3:2 aspect ratio
-            double tx = (userPos.X * 5) - 2.5f;
-            double ty = (userPos.Y * 3) - 1.5f;
+			// Get the 3D pose from the picture space measurements
+			// TODO: Use directly the 3D pose from the API (?)
+			eyesDistance = gazeUtils.GetLastValidUserDistance();
 
-            //position camera X-Y plane and adjust distance
-            eyesDistance = gazeUtils.GetLastValidUserDistance();
-            depthMod = 2 * eyesDistance;
-
-            Vector3 newPos = new Vector3(
-                (float)tx,
-                (float)ty,
-                (float)(baseDist + depthMod));
-            cam.transform.position = newPos;
+			Vector3 new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
+			cam.transform.position = new3DPos;
 
 			// Update the MotionFilter for both eyes
-			double []newPose = new double[3];
-			double []correctedPose;
+			double[] correctedPoseLeft;
+			double[] correctedPoseRight;
 
 			userPos = gazeUtils.GetLastValidLeftEyePosition();
-			// TODO : do a proper retroprojection here !
-			tx = (userPos.X * 5) - 2.5f;
-			ty = (userPos.Y * 3) - 1.5f;
-			newPose[0] = tx;
-			newPose[1] = ty;
-			newPose[2] = baseDist + depthMod;
-			
-			filteredPoseLeftEye.Predict();
-			filteredPoseLeftEye.Correct(newPose,3);
-			filteredPoseLeftEye.GetPostState(out correctedPose);
+			new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
+			filteredPoseLeftEye.Predict(); // Propagate the previous measurement
+			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPos), 3); // Correct with the new observation
+			filteredPoseLeftEye.GetPostState(out correctedPoseLeft); // Get the up-to-date estimation
 
 			userPos = gazeUtils.GetLastValidRightEyePosition();
-			// TODO : do a proper retroprojection here !
-			tx = (userPos.X * 5) - 2.5f;
-			ty = (userPos.Y * 3) - 1.5f;
-			newPose[0] = tx;
-			newPose[1] = ty;
+			new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
 			filteredPoseRightEye.Predict();
-			filteredPoseRightEye.Correct(newPose,3);
-			filteredPoseRightEye.GetPostState(out correctedPose);
+			filteredPoseRightEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPos), 3);
+			filteredPoseRightEye.GetPostState(out correctedPoseRight);
+
+			// Deal with faulty cases when one of the eyes is not visible
+			// TODO
 
 			//camera 'look at' origo
             cam.transform.LookAt(Vector3.zero);

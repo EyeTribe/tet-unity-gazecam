@@ -60,6 +60,7 @@
     <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
     <None Include="Assets\Standard Assets\Projectors\Sources\Shaders\Projector Multiply.shader" />
     <None Include="Assets\Plugins\Newtonsoft-Json-License.txt" />
+    <None Include="Assets\Scripts\GeneralMatrix\Docs\GeneralMatrix.xml" />
     <None Include="Assets\Standard Assets\Projectors\Sources\Shaders\Projector Light.shader" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>Assets\Plugins\Newtonsoft.Json.dll</HintPath>
