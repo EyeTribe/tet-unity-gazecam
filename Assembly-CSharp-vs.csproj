@@ -52,14 +52,10 @@
      <Compile Include="Assets\Scripts\GeneralMatrix\AssemblyInfo.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\CholeskyDecomposition.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\EigenvalueDecomposition.cs" />
-     <Compile Include="Assets\Scripts\GeneralMatrix\Example\AssemblyInfo.cs" />
-     <Compile Include="Assets\Scripts\GeneralMatrix\Example\MagicSquareExample.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\GeneralMatrix.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\LUDecomposition.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\QRDecomposition.cs" />
      <Compile Include="Assets\Scripts\GeneralMatrix\SingularValueDecomposition.cs" />
-     <Compile Include="Assets\Scripts\GeneralMatrix\Test\AssemblyInfo.cs" />
-     <Compile Include="Assets\Scripts\GeneralMatrix\Test\TestMatrix.cs" />
      <Compile Include="Assets\Scripts\HeadPoseFilter.cs" />
      <Compile Include="Assets\Scripts\UnityGazeUtils.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />

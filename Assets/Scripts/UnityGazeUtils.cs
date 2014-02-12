@@ -10,11 +10,10 @@ namespace Assets.Scripts
 {
     class UnityGazeUtils : GazeUtils
     {
-
 		/// <summary>
 		/// Converts a coordinate on picture space to a 3D pose
 		/// </summary>
-		public static Vector3 backProjectDepth(Point2D eyePictCoord, double eyesDistance, double baseDist) {
+		public static Vector3 BackProjectDepth(Point2D eyePictCoord, double eyesDistance, double baseDist) {
 			
 			//mapping cam panning to 3:2 aspect ratio
 			double tx = (eyePictCoord.X * 5) - 2.5f;
@@ -79,7 +78,5 @@ namespace Assets.Scripts
         {
             return getRelativeToScreenSpace(gp, Screen.width, Screen.height);
         }
-
-
     }
 }

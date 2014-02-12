@@ -18,6 +18,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private double baseDist;
     private double depthMod;
 
+	private bool filteredPose;
+	private double currentSmoothing;
 	private MotionFilter filteredPoseLeftEye;
 	private MotionFilter filteredPoseRightEye;
 
@@ -26,7 +28,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private Collider currentHit;
 
     private GazeDataValidator gazeUtils;
-
+		
 	void Start () 
     {
         //Stay in landscape
@@ -40,6 +42,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         gazeUtils = new GazeDataValidator(30);
 
 		// Initializing the head pose filtering
+		filteredPose = false;
 		filteredPoseLeftEye = new MotionFilter(1, 1, 3);
 		filteredPoseRightEye = new MotionFilter(1, 1, 3);
 
@@ -63,33 +66,38 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			// Get the 3D pose from the picture space measurements
 			// TODO: Use directly the 3D pose from the API (?)
 			eyesDistance = gazeUtils.GetLastValidUserDistance();
+			Vector3 new3DPos = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
 
-			Vector3 new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
-			cam.transform.position = new3DPos;
-
-			// Update the MotionFilter for both eyes
+			// Update the MotionFilter for both eyes anyway (so that the filter is up-to-date)
 			double[] correctedPoseLeft;
 			double[] correctedPoseRight;
+			double confidenceLeft, confidenceRight;
 
 			userPos = gazeUtils.GetLastValidLeftEyePosition();
-			new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
+			Vector3 new3DPosLeft = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
 			filteredPoseLeftEye.Predict(); // Propagate the previous measurement
-			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPos), 3); // Correct with the new observation
-			filteredPoseLeftEye.GetPostState(out correctedPoseLeft); // Get the up-to-date estimation
+			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosLeft), 3); // Correct with the new observation
+			filteredPoseLeftEye.GetPostState(out correctedPoseLeft, out confidenceLeft); // Get the up-to-date estimation
 
 			userPos = gazeUtils.GetLastValidRightEyePosition();
-			new3DPos = UnityGazeUtils.backProjectDepth(userPos, eyesDistance, baseDist);
+			Vector3 new3DPosRight = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
 			filteredPoseRightEye.Predict();
-			filteredPoseRightEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPos), 3);
-			filteredPoseRightEye.GetPostState(out correctedPoseRight);
+			filteredPoseRightEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosRight), 3);
+			filteredPoseRightEye.GetPostState(out correctedPoseRight, out confidenceRight);
 
-			// Deal with faulty cases when one of the eyes is not visible
-			// TODO
+			// Deal with faulty cases when one of the eyes is not visible, merge the two positions
+			Vector3 newFiltered3DPos = MotionFilter.MergePositions(new3DPosLeft, confidenceLeft, new3DPosRight, confidenceRight);
 
-			//camera 'look at' origo
+			if (filteredPose) {
+				cam.transform.position = newFiltered3DPos;
+			} else {
+				cam.transform.position = new3DPos;
+			}
+
+			// Camera 'look at' origin
             cam.transform.LookAt(Vector3.zero);
 
-            //tilt cam according to eye angle
+            // Tilt cam according to eye angle
             double angle = gazeUtils.GetLastValidEyesAngle();
             cam.transform.eulerAngles = new Vector3(cam.transform.eulerAngles.x, cam.transform.eulerAngles.y, cam.transform.eulerAngles.z + (float)angle);
         }
@@ -98,8 +106,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
         if (null != gazeCoords)
         {
-            //map gaze indicator
-//            Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords, Screen.currentResolution);
+            // Map gaze indicator
 			Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords);
 			
 			Vector3 screenPoint = new Vector3((float)gp.X, (float)gp.Y, cam.nearClipPlane + .1f);
@@ -107,20 +114,38 @@ public class GazeCamera : MonoBehaviour, IGazeListener
             Vector3 planeCoord = cam.ScreenToWorldPoint(screenPoint);
             gazeIndicator.transform.position = planeCoord;
 
-            //handle collision detection
+            // Handle collision detection
             checkGazeCollision(screenPoint);
         }
 
-        //handle keypress
+        // Handle keypress
         if (Input.GetKey(KeyCode.Escape))
         {
             Application.Quit();
         }
-        else
-        if (Input.GetKey(KeyCode.Space))
-        {
+        else if (Input.GetKey(KeyCode.Space))	
+		{
             Application.LoadLevel(0);
-        }
+        } 
+		else if (Input.GetKey(KeyCode.F))	
+		{
+			// Trigger the pose estimation filter
+			this.filteredPose = !this.filteredPose;
+		} 
+		else if (Input.GetKey(KeyCode.S)) 
+		{
+			// Increase pose smoothing
+			this.currentSmoothing *= 1.1;
+			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
+			filteredPoseRightEye.updateSmoothing(currentSmoothing);
+		} 
+		else if (Input.GetKey(KeyCode.D)) 
+		{
+			// Decrease smoothing
+			this.currentSmoothing *= 0.9;
+			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
+			filteredPoseRightEye.updateSmoothing(currentSmoothing);
+		}
 	}
 
     private void checkGazeCollision(Vector3 screenPoint)
