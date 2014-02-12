@@ -17,13 +17,13 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private double baseDist;
     private double depthMod;
 
-    private Component gazeIndicator; 
+    private Component gazeIndicator;
 
     private Collider currentHit;
 
     private GazeDataValidator gazeUtils;
 
-	void Start () 
+    void Start()
     {
         //Stay in landscape
         Screen.autorotateToPortrait = false;
@@ -37,15 +37,15 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
         //register for gaze updates
         GazeManager.Instance.AddGazeListener(this);
-	}
+    }
 
-    public void OnGazeUpdate(GazeData gazeData) 
+    public void OnGazeUpdate(GazeData gazeData)
     {
         //Add frame to GazeData cache handler
         gazeUtils.Update(gazeData);
     }
 
-	void Update ()
+    void Update()
     {
         Point2D userPos = gazeUtils.GetLastValidUserPosition();
 
@@ -78,7 +78,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         if (null != gazeCoords)
         {
             //map gaze indicator
-            Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords, Screen.currentResolution);
+            Point2D gp = UnityGazeUtils.getGazeCoordsToUnityWindowCoords(gazeCoords);
 
             Vector3 screenPoint = new Vector3((float)gp.X, (float)gp.Y, cam.nearClipPlane + .1f);
 
@@ -94,12 +94,11 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         {
             Application.Quit();
         }
-        else
-        if (Input.GetKey(KeyCode.Space))
+        else if (Input.GetKey(KeyCode.Space))
         {
             Application.LoadLevel(0);
         }
-	}
+    }
 
     private void checkGazeCollision(Vector3 screenPoint)
     {

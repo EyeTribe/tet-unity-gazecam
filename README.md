@@ -1,4 +1,4 @@
-GazeCam Unity Sample for The Eye Tribe Tracker
+GazeCam Unity Sample
 ====
 <p>
 
@@ -38,6 +38,11 @@ Should question arise, do not hesitate to post them on [The Eye Tribe Forum](htt
 
 Changelog
 ----
+
+0.9.27 (2014-02-12)
+- Fixed tab/space formatting
+- Updated C# SDK
+- Fixing UnityGazeUtils issue
 
 0.9.26 (2014-01-30)
 - Initial release
