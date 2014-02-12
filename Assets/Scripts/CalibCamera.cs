@@ -122,7 +122,7 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
                 }
             }
         }
-        else 
+        else
         {
             //Make eyes invisible eyes
             if (leftEye.renderer.enabled)
@@ -264,7 +264,7 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
         //Called when the calculation of the calibration results begins
     }
 
-    public void OnCalibrationResult(CalibrationResult calibResult) 
+    public void OnCalibrationResult(CalibrationResult calibResult)
     {
         //Should we resample?
         if (!calibResult.Result)
@@ -310,13 +310,13 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
         SetRendererEnabled(calibPointGO, false);
 
         //short delay before calling next cp
-        if(calibrationPoints.Count > 0)
+        if (calibrationPoints.Count > 0)
             Invoke("showNextCalibrationPoint", .25f);
     }
 
     private void showNextCalibrationPoint()
     {
-        if(calibrationPoints.Count > 0)
+        if (calibrationPoints.Count > 0)
         {
             //fetch next calibration point
             calibPoint = calibrationPoints[0];

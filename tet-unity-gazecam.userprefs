@@ -1,11 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\UnityGazeUtils.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GazeCamera.cs">
     <Files>
-      <File FileName="Assets\Scripts\CalibCamera.cs" Line="62" Column="9" />
-      <File FileName="Assets\Scripts\GazeCamera.cs" Line="83" Column="72" />
-      <File FileName="Assets\Scripts\UnityGazeUtils.cs" Line="62" Column="37" />
-      <File FileName="Assets\Scripts\HeadPoseFilter.cs" Line="2" Column="1" />
+      <File FileName="Assets\Scripts\GazeCamera.cs" Line="46" Column="30" />
+      <File FileName="Assets\Scripts\UnityGazeUtils.cs" Line="36" Column="9" />
+      <File FileName="Assets\Scripts\HeadPoseFilter.cs" Line="76" Column="59" />
       <File FileName="Assets\Scripts\GazeDataValidator.cs" Line="129" Column="44" />
       <File FileName="Assets\Scripts\GeneralMatrix\GeneralMatrix.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\GeneralMatrix\Example\MagicSquareExample.cs" Line="1" Column="1" />
