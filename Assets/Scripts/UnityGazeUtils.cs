@@ -11,10 +11,10 @@ namespace Assets.Scripts
     class UnityGazeUtils : GazeUtils
     {
 		/// <summary>
-		/// Converts a coordinate on picture space to a 3D pose
+		/// Converts a coordinate on picture space to a 3D pose, using an expected inter-eyes distance to compute depth coordinate
 		/// </summary>
 		public static Vector3 BackProjectDepth(Point2D eyePictCoord, double eyesDistance, double baseDist) {
-			
+
 			//mapping cam panning to 3:2 aspect ratio
 			double tx = (eyePictCoord.X * 5) - 2.5f;
 			double ty = (eyePictCoord.Y * 3) - 1.5f;
@@ -26,6 +26,24 @@ namespace Assets.Scripts
 			                   (float)ty,
 			                   (float)(baseDist + depthMod));
 		}
+
+        /// <summary>
+        /// Converts a coordinate on picture space to a 3D pose, using an expected inter-eyes distance to compute depth coordinate.
+        /// We follow the standard Pinhole model here
+        /// </summary>
+        public static Vector3 BackProjectDepthPinhole(Point2D eyePictCoord, double pictEyesDistance) {
+			// We use the pinhole model, with a depth related to the inter-eyes distance
+			double interEyesDistance = 0.06; 	// 6cm on average
+            double depth = interEyesDistance / Math.Max (pictEyesDistance, 0.0001F);
+
+			double tx = (eyePictCoord.X-0.5) * depth;
+			double ty = (eyePictCoord.Y-0.5) * depth;
+
+			return new Vector3((float)tx,
+			                   (float)ty,
+			                   (float)depth);
+		}
+
 
         /// <summary>
         /// Maps a GazeData gaze point (RawCoordinates or SmoothedCoordinates) to Unity screen space. 

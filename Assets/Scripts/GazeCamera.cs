@@ -3,7 +3,7 @@ using System.Collections;
 using TETCSharpClient;
 using TETCSharpClient.Data;
 using Assets.Scripts;
-using Filter.Utils;
+using FilterUtils;
 using System.Diagnostics; // Console output
 using System;
 
@@ -17,15 +17,13 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private Camera cam;
 
     private double eyesDistance;
-    private double baseDist;
     private double depthMod;
-
-	private bool filteredPose;
-	private double currentSmoothing;
-	private MotionFilter filteredPoseLeftEye;
-	private MotionFilter filteredPoseRightEye;
+    private double baseDist;
 
     private Component gazeIndicator; 
+
+	private bool    filteredPose;
+    private float   currentSmoothing;
 
     private Collider currentHit;
 
@@ -37,16 +35,16 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         Screen.autorotateToPortrait = false;
 
         cam = GetComponent<Camera>();
-        baseDist = cam.transform.position.z;
         gazeIndicator = cam.transform.GetChild(0);
 
+        baseDist = cam.transform.position.z;
+            
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
+		gazeUtils.setBaseDist(cam.transform.position.z); // Give the filtering framework the information about the cam pose
 
-		// Initializing the head pose filtering
 		filteredPose = false;
-		filteredPoseLeftEye = new MotionFilter(1, 1, 3);
-		filteredPoseRightEye = new MotionFilter(1, 1, 3);
+        currentSmoothing = 1F;
 
         //register for gaze updates
         GazeManager.Instance.AddGazeListener(this);
@@ -67,41 +65,34 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         {
 			// Get the 3D pose from the picture space measurements
 			// TODO: Use directly the 3D pose from the API (?)
-			eyesDistance = gazeUtils.GetLastValidUserDistance();
-			Vector3 new3DPos = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
-
-			// Update the MotionFilter for both eyes anyway (so that the filter is up-to-date)
-			double[] correctedPoseLeft;
-			double[] correctedPoseRight;
-			double confidenceLeft, confidenceRight;
-
-			userPos = gazeUtils.GetLastValidLeftEyePosition();
-			Vector3 new3DPosLeft = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
-			filteredPoseLeftEye.Predict(); // Propagate the previous measurement
-			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosLeft), 3); 		// Correct with the new observation
-			filteredPoseLeftEye.GetPostState(out correctedPoseLeft, out confidenceLeft); 	// Get the up-to-date estimation
-
-			userPos = gazeUtils.GetLastValidRightEyePosition();
-			Vector3 new3DPosRight = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
-			filteredPoseRightEye.Predict();
-			filteredPoseRightEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosRight), 3);
-			filteredPoseRightEye.GetPostState(out correctedPoseRight, out confidenceRight);
-
-			// Deal with faulty cases when one of the eyes is not visible, merge the two positions
-			Vector3 newFiltered3DPos = MotionFilter.MergePositions(new3DPosLeft, confidenceLeft, new3DPosRight, confidenceRight);
-		
 			if (filteredPose) {
-				cam.transform.position = newFiltered3DPos;
-			} else {
-				cam.transform.position = new3DPos;
-			}
+                Vector3 newCamPose = gazeUtils.GetFilteredHeadPose();
 
-			// Camera 'look at' origin
-            cam.transform.LookAt(Vector3.zero);
+                // Change units to fit with the assets of the 3D scene...
+                // TODO: bring back the scene to a proper scale, this breaks the immersion
+                // (the move is amplified)
+                newCamPose.x = 10*newCamPose.x;
+                newCamPose.y = -10*newCamPose.y;
+                newCamPose.z = -10*newCamPose.z;
+                
+                cam.transform.position = newCamPose;
 
-            // Tilt cam according to eye angle
-            double angle = gazeUtils.GetLastValidEyesAngle();
-            cam.transform.eulerAngles = new Vector3(cam.transform.eulerAngles.x, cam.transform.eulerAngles.y, cam.transform.eulerAngles.z + (float)angle);
+                // We don't tilt the cam to get the 3D effect
+                // Camera 'look at' origin
+                cam.transform.LookAt(Vector3.zero);
+                
+            } else {
+                gazeUtils.GetFilteredHeadPose();
+                eyesDistance = gazeUtils.GetLastValidUserDistance();
+                cam.transform.position = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
+
+                // Camera 'look at' origin
+                cam.transform.LookAt(Vector3.zero);
+                
+                // Tilt cam according to eye angle
+                double angle = gazeUtils.GetLastValidEyesAngle();
+                cam.transform.eulerAngles = new Vector3(cam.transform.eulerAngles.x, cam.transform.eulerAngles.y, cam.transform.eulerAngles.z + (float)angle);
+            }
         }
 
         Point2D gazeCoords = gazeUtils.GetLastValidSmoothedGazeCoordinates();
@@ -135,21 +126,17 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			this.filteredPose = !this.filteredPose;
 
 		} 
-		else if (Input.GetKey(KeyCode.S)) 
+		else if (Input.GetKeyDown(KeyCode.S)) 
 		{
 			// Increase pose smoothing
-			currentSmoothing *= 1.1;
-			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
-			filteredPoseRightEye.updateSmoothing(currentSmoothing);
-			Console.WriteLine("New smoothing value : %d\n", currentSmoothing);
+			currentSmoothing *= 1.1F;
+            gazeUtils.setSmoothing(currentSmoothing);
 		} 
-		else if (Input.GetKey(KeyCode.D)) 
+        else if (Input.GetKeyDown(KeyCode.D)) 
 		{
 			// Decrease smoothing
-			currentSmoothing *= 0.9;
-			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
-			filteredPoseRightEye.updateSmoothing(currentSmoothing);
-			Console.WriteLine("New smoothing value : %d\n", currentSmoothing);
+			currentSmoothing *= 0.9F;
+            gazeUtils.setSmoothing(currentSmoothing);
 		}
 	}
 
@@ -195,16 +182,16 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			if (GUI.Button(new Rect(padding, y, btnWidth, btnHeight), "Engage Filtering"))
 			{
 				this.filteredPose = true;
-			}
-		} else {
+            }
+        } else {
 			if (GUI.Button(new Rect(padding, y, btnWidth, btnHeight), "Disengage Filtering"))
 			{
 				this.filteredPose = false;
-			}
-		}
-	}
-	
-	void OnApplicationQuit()
+            }
+        }
+    }
+    
+    void OnApplicationQuit()
     {
         GazeManager.Instance.RemoveGazeListener(this);
     }

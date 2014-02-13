@@ -1,8 +1,10 @@
 using DotNetMatrix;
 using UnityEngine;
+using Assets.Scripts;
+
 // Initial code of the KF from http://autospreader.wordpress.com/2011/01/17/a-c-kalman-filter-class/
 
-namespace Filter
+namespace FilterUtils
 {
 	// A motion filter which instanciates a KalmanFilter with a constant motion model
 	public class MotionFilter 
@@ -10,11 +12,11 @@ namespace Filter
 		// All we need to feed the Kalman Filter
 		private GeneralMatrix f, b, u, q, h, r;
 		private KalmanFilter KF;
-		private float _timeDilution, _measurementAccuracy;
+		private double _timeDilution, _measurementAccuracy;
 		private int _dim;
 		
 		// The motion filter constructor
-		public MotionFilter(float measurementAccuracy, float timeDilution) {
+		public MotionFilter(double measurementAccuracy, double timeDilution) {
 			_measurementAccuracy 	= measurementAccuracy;
 			_timeDilution 			= timeDilution;
 			_dim					= 3;
@@ -47,16 +49,17 @@ namespace Filter
 			
 			// R : observation noise
 			r = new GeneralMatrix(_dim, _dim, 0);
-			for (int i=0; i<_dim; ++i) {
-				r.SetElement(i,i,_measurementAccuracy);
-			}
-			
+
+            r.SetElement(0,0,_measurementAccuracy);
+            r.SetElement(1,1,_measurementAccuracy);
+            r.SetElement(2,2,_measurementAccuracy*3); // There's a lot of noise in depth with the current method..
+
 			// Define the initial state and covariance :
 			// TODO : define them with the first measurement !
 			GeneralMatrix KFState = new GeneralMatrix(_dim, 1, 0);
 			GeneralMatrix KFCovariance = new GeneralMatrix(_dim, _dim, 0);
 			for (int i=0; i<_dim; ++i) {
-				KFCovariance.SetElement (i,i,1);
+				KFCovariance.SetElement (i,i,1F);
 			}
 			
 			// ------
@@ -67,23 +70,21 @@ namespace Filter
 		}
 		
 		// Deal with the conditionnal merging of the two eyeballs positions
-		public static Vector3 MergePositions(Vector3 pose1, float confidence1, Vector3 pose2, float confidence2) {
+		public static Vector3 MergePositions(Vector3 pose1, double confidence1, Vector3 pose2, double confidence2) {
 			Vector3 mergedPose = new Vector3();
-			float threshold = 10;
-			float interEyesDistance = 0.06F;
+			double threshold = 10;
+			double interEyesDistance = 0.06;
 			
 			if  ((confidence2 == 0) || (confidence1/confidence2 > threshold)) {
 				// Pick the pose from the left eye
 				mergedPose = pose1;
-				
-				// TODO : add an offset to use the position in between the eyes as a reference
+                mergedPose.x += (float) (interEyesDistance/2);
 				
 			} else if ((confidence1 == 0) || (confidence2/confidence1 > threshold)) {
 				// Pick the pose from the right eye
 				mergedPose = pose2;
-				
-				// TODO : add an offset to use the position in between the eyes as a reference
-				
+                mergedPose.y -= (float) (interEyesDistance/2);
+
 			} else {
 				// Set the pose in between the two
 				mergedPose = (pose1 + pose2)/2;
@@ -92,7 +93,7 @@ namespace Filter
 			return mergedPose;
 		}
 		
-		public void updateSmoothing(float new_confidence) {
+		public void updateSmoothing(double new_confidence) {
 			// Update the current confidence level in the measurements
 			_measurementAccuracy = new_confidence;
 			
@@ -105,28 +106,27 @@ namespace Filter
 			KF.Predict();
 		}
 		
-		public void Correct(float[] newMeasure) {
-			GeneralMatrix MeasureVec = new GeneralMatrix(newMeasure, _dim);
+		public void Correct(Vector3 newMeasure) {
+
+            GeneralMatrix MeasureVec = new GeneralMatrix(UnityGazeUtils.Vec3ToArray(newMeasure), _dim);
 			KF.Correct(MeasureVec);
 		}
 		
-		public void GetPreState(out float[] PreState, out float confidence) {
-			PreState = new float[_dim];
-			for (int i=0; i<_dim; ++i) {
-				PreState[i] = KF.X0.GetElement(i,0);
-			}
-			
-			// TODO: Output a confidence level based on the current covariance
+		public void GetPreState(out Vector3 PreState, out double confidence) {
+            PreState = new Vector3((float) KF.X0.GetElement(0,0),
+                                   (float) KF.X0.GetElement(1,0),
+                                   (float) KF.X0.GetElement(2,0));
+            
+            // TODO: Output a confidence level based on the current covariance
 			confidence = KF.P0.GetElement(0,0);
 		}
 		
-		public void GetPostState(out float[] PostState, out float confidence) {
-			PostState = new float[_dim];
-			for (int i=0; i<_dim; ++i) {
-				PostState[i] = KF.State.GetElement(i,0);
-			}
-			
-			// TODO: Output a confidence level based on the current covariance
+        public void GetPostState(out Vector3 PostState, out double confidence) {
+            PostState = new Vector3((float) KF.State.GetElement(0,0),
+                                    (float) KF.State.GetElement(1,0),
+                                    (float) KF.State.GetElement(2,0));
+            
+            // TODO: Output a confidence level based on the current covariance
 			confidence = KF.Covariance.GetElement(0,0);
 		}
 	}

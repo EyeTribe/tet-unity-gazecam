@@ -86,7 +86,6 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
 
             if (null != userPos)
             {
-
                 //Make eyes visible
                 if (!leftEye.renderer.enabled)
                     leftEye.renderer.enabled = true;
