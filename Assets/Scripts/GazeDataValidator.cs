@@ -121,13 +121,19 @@ namespace Assets.Scripts
         }
 
 		public Point2D GetLastValidLeftEyePosition() {
-			// TODO : check for a memory leak here !
-			return new Point2D(_LastValidLeftEye.PupilCenterCoordinates.X, _LastValidLeftEye.PupilCenterCoordinates.Y);
+			if (null != _LastValidLeftEye) {
+				return new Point2D(_LastValidLeftEye.PupilCenterCoordinates.X, _LastValidLeftEye.PupilCenterCoordinates.Y);
+			} else {
+				return new Point2D();
+			}
 		}
 
 		public Point2D GetLastValidRightEyePosition() {
-			// TODO : check for a memory leak here !
-			return new Point2D(_LastValidRightEye.PupilCenterCoordinates.X, _LastValidRightEye.PupilCenterCoordinates.Y);
+			if (null != _LastValidRightEye) {
+				return new Point2D(_LastValidRightEye.PupilCenterCoordinates.X, _LastValidRightEye.PupilCenterCoordinates.Y);
+			} else {
+				return new Point2D();
+			}
 		}
 
 

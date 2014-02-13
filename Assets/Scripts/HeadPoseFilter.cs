@@ -23,38 +23,48 @@ namespace Filter.Utils
 			// ------
 			// Define the matrices over there
 			// F : motion model
-			f = new GeneralMatrix(dim, dim, 0);
-			for (int i=0; i<dim; ++i) {
-				h.SetElement(i,i,1);
+			f = new GeneralMatrix(_dim, _dim, 0);
+			for (int i=0; i<_dim; ++i) {
+				f.SetElement(i,i,1);
 			}
 
 			// B : control input model
-			b = new GeneralMatrix(dim, dim, 0);
+			b = new GeneralMatrix(_dim, _dim, 0);
 
 			// U : control vector
-			u = new GeneralMatrix(dim, 1, 0);
+			u = new GeneralMatrix(_dim, 1, 0);
 
 			// Q : propagation noise
-			q = new GeneralMatrix(dim, dim, 0);
-			for (int i=0; i<dim; ++i) {
+			q = new GeneralMatrix(_dim, _dim, 0);
+			for (int i=0; i<_dim; ++i) {
 				q.SetElement(i,i,_timeDilution);
 			}
 
 			// H : observation model -> simple identity
-			h = new GeneralMatrix(dim, dim, 0);
-			for (int i=0; i<dim; ++i) {
+			h = new GeneralMatrix(_dim, _dim, 0);
+			for (int i=0; i<_dim; ++i) {
 				h.SetElement(i,i,1);
 			}
 
 			// R : observation noise
-			r = new GeneralMatrix(dim, dim, 0);
-			for (int i=0; i<dim; ++i) {
+			r = new GeneralMatrix(_dim, _dim, 0);
+			for (int i=0; i<_dim; ++i) {
 				r.SetElement(i,i,_measurementAccuracy);
 			}
+
+			// Define the initial state and covariance :
+			// TODO : define them with the first measurement !
+			GeneralMatrix KFState = new GeneralMatrix(_dim, 1, 0);
+			GeneralMatrix KFCovariance = new GeneralMatrix(_dim, _dim, 0);
+			for (int i=0; i<_dim; ++i) {
+				KFCovariance.SetElement (i,i,1);
+			}
+
 			// ------
 
+
 			// Instanciate the KF
-			KF = new KalmanFilter(f,b,u,q,h,r);
+			KF = new KalmanFilter(f,b,u,q,h,r, KFState, KFCovariance);
 		}
 
 		// Deal with the conditionnal merging of the two eyeballs positions
@@ -138,7 +148,7 @@ namespace Filter.Utils
         public GeneralMatrix Covariance { get; private set; }  
 
         public KalmanFilter(GeneralMatrix f, GeneralMatrix b, GeneralMatrix u, GeneralMatrix q, GeneralMatrix h,
-                            GeneralMatrix r)
+                            GeneralMatrix r, GeneralMatrix iState, GeneralMatrix iCovariance)
         {
             F = f;
             B = b;
@@ -146,6 +156,9 @@ namespace Filter.Utils
             Q = q;
             H = h;
             R = r;
+
+			State = iState;
+			Covariance = iCovariance;
         }
 
         public void Predict()

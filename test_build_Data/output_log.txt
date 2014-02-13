@@ -22,8 +22,17 @@ Loading C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Man
 - Completed reload, in  0.042 seconds
 <RI> Initializing input.
 <RI> Input initialized.
-desktop: 1920x1080 60Hz; virtual: 3840x1200 at 0,0
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.dll (this message is harmless)
 Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Configuration.dll (this message is harmless)
 Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Xml.dll (this message is harmless)
 Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Runtime.Serialization.dll (this message is harmless)
+Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Xml.Linq.dll (this message is harmless)
+Platform assembly: C:\Users\Benjamin\Documents\GitHub\tet-unity-gazecam\test_build_Data\Managed\System.Data.dll (this message is harmless)
+UnloadTime: 0.345545 ms
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0 / Dirty serialized files: 0)
+
+Unloading 5 unused Assets to reduce memory usage. Loaded Objects now: 182.
+Total: 1.055452 ms (FindLiveObjects: 0.011974 ms CreateObjectMapping: 0.008553 ms MarkObjects: 0.598289 ms  DeleteObjects: 0.022665 ms)
+

@@ -4,6 +4,8 @@ using TETCSharpClient;
 using TETCSharpClient.Data;
 using Assets.Scripts;
 using Filter.Utils;
+using System.Diagnostics; // Console output
+using System;
 
 /// <summary>
 /// Component attached to 'Main Camera' of '/Scenes/std_scene.unity'.
@@ -76,8 +78,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			userPos = gazeUtils.GetLastValidLeftEyePosition();
 			Vector3 new3DPosLeft = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
 			filteredPoseLeftEye.Predict(); // Propagate the previous measurement
-			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosLeft), 3); // Correct with the new observation
-			filteredPoseLeftEye.GetPostState(out correctedPoseLeft, out confidenceLeft); // Get the up-to-date estimation
+			filteredPoseLeftEye.Correct(UnityGazeUtils.Vec3ToArray(new3DPosLeft), 3); 		// Correct with the new observation
+			filteredPoseLeftEye.GetPostState(out correctedPoseLeft, out confidenceLeft); 	// Get the up-to-date estimation
 
 			userPos = gazeUtils.GetLastValidRightEyePosition();
 			Vector3 new3DPosRight = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
@@ -87,7 +89,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
 			// Deal with faulty cases when one of the eyes is not visible, merge the two positions
 			Vector3 newFiltered3DPos = MotionFilter.MergePositions(new3DPosLeft, confidenceLeft, new3DPosRight, confidenceRight);
-
+		
 			if (filteredPose) {
 				cam.transform.position = newFiltered3DPos;
 			} else {
@@ -131,20 +133,23 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		{
 			// Trigger the pose estimation filter
 			this.filteredPose = !this.filteredPose;
+
 		} 
 		else if (Input.GetKey(KeyCode.S)) 
 		{
 			// Increase pose smoothing
-			this.currentSmoothing *= 1.1;
+			currentSmoothing *= 1.1;
 			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
 			filteredPoseRightEye.updateSmoothing(currentSmoothing);
+			Console.WriteLine("New smoothing value : %d\n", currentSmoothing);
 		} 
 		else if (Input.GetKey(KeyCode.D)) 
 		{
 			// Decrease smoothing
-			this.currentSmoothing *= 0.9;
+			currentSmoothing *= 0.9;
 			filteredPoseLeftEye.updateSmoothing(currentSmoothing);
 			filteredPoseRightEye.updateSmoothing(currentSmoothing);
+			Console.WriteLine("New smoothing value : %d\n", currentSmoothing);
 		}
 	}
 
@@ -183,9 +188,23 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         {
             Application.LoadLevel(0);
         }
-    }
 
-    void OnApplicationQuit()
+		y += padding + btnHeight;
+
+		if (!filteredPose) {
+			if (GUI.Button(new Rect(padding, y, btnWidth, btnHeight), "Engage Filtering"))
+			{
+				this.filteredPose = true;
+			}
+		} else {
+			if (GUI.Button(new Rect(padding, y, btnWidth, btnHeight), "Disengage Filtering"))
+			{
+				this.filteredPose = false;
+			}
+		}
+	}
+	
+	void OnApplicationQuit()
     {
         GazeManager.Instance.RemoveGazeListener(this);
     }
