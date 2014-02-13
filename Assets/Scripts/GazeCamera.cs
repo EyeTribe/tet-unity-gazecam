@@ -77,7 +77,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
                 
                 cam.transform.position = newCamPose;
 
-                // We don't tilt the cam to get the 3D effect
+                // We don't tilt the cam to get the 3D effect (see below)
                 // Camera 'look at' origin
                 cam.transform.LookAt(Vector3.zero);
                 

@@ -52,7 +52,7 @@ namespace FilterUtils
 
             r.SetElement(0,0,_measurementAccuracy);
             r.SetElement(1,1,_measurementAccuracy);
-            r.SetElement(2,2,_measurementAccuracy*3); // There's a lot of noise in depth with the current method..
+            r.SetElement(2,2,_measurementAccuracy*10); // There's a lot of noise in depth with the current method..
 
 			// Define the initial state and covariance :
 			// TODO : define them with the first measurement !

@@ -62,7 +62,10 @@ namespace Assets.Scripts
                     if (null == left && null == right &&
                         null != gd.RightEye && gd.RightEye.PupilCenterCoordinates.X != 0 && gd.RightEye.PupilCenterCoordinates.Y != 0 
                         && null != gd.LeftEye && gd.LeftEye.PupilCenterCoordinates.X != 0 && gd.LeftEye.PupilCenterCoordinates.Y != 0)
-                        _LastValidInterEyes = Point2DDistance (_LastValidLeftEye, _LastValidRightEye);
+                    {
+                        double newDistance  = Point2DDistance (_LastValidLeftEye, _LastValidRightEye);
+                        _LastValidInterEyes = Math.Max (Math.Min (newDistance, _MaximumEyesDistance), _MinimumEyesDistance);
+                    }
 
                     // Valid left eye is found --> update
                     if (null == left && null != gd.LeftEye && gd.LeftEye.PupilCenterCoordinates.X != 0 && gd.LeftEye.PupilCenterCoordinates.Y != 0)
