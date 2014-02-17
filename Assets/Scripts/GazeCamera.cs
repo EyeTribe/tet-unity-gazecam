@@ -20,7 +20,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
     private double depthMod;
     private double baseDist;
 
-    private Component gazeIndicator; 
+    private Component gazeIndicator;
+	private GameObject gazeTrail;
 
 	private bool    filteredPose;
     private float   currentSmoothing;
@@ -35,10 +36,15 @@ public class GazeCamera : MonoBehaviour, IGazeListener
         Screen.autorotateToPortrait = false;
 
         cam = GetComponent<Camera>();
-        gazeIndicator = cam.transform.GetChild(0);
+        gazeIndicator = cam.transform.GetChild(0); 
+		baseDist = cam.transform.position.z;
 
-        baseDist = cam.transform.position.z;
-            
+		// Define the trail and the appropriate material
+		gazeTrail = new GameObject();
+		gazeTrail.AddComponent("TimedTrailRenderer");
+//		Material trailTexture = Resources.Load("dotcenter_trail.mat", typeof(Material)) as Material;
+//		gazeTrail.GetComponent<TimedTrailRenderer>().material = trailTexture;
+	            
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
 		gazeUtils.setBaseDist(cam.transform.position.z); // Give the filtering framework the information about the cam pose
@@ -82,7 +88,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
                 cam.transform.LookAt(Vector3.zero);
                 
             } else {
-                gazeUtils.GetFilteredHeadPose();
+                gazeUtils.GetFilteredHeadPose(); // Propagate the filter, even if we don't use it
+
                 eyesDistance = gazeUtils.GetLastValidUserDistance();
                 cam.transform.position = UnityGazeUtils.BackProjectDepth(userPos, eyesDistance, baseDist);
 
@@ -107,8 +114,13 @@ public class GazeCamera : MonoBehaviour, IGazeListener
             Vector3 planeCoord = cam.ScreenToWorldPoint(screenPoint);
             gazeIndicator.transform.position = planeCoord;
 
-            // Handle collision detection
-            checkGazeCollision(screenPoint);
+            // Handle collision detection & trail after gaze
+			Vector3 hitPoint;
+			if (checkGazeCollision(screenPoint, out hitPoint))
+			{
+//				gazeTrail.transform.position = hitPoint;
+			}
+
         }
 
         // Handle keypress
@@ -123,8 +135,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		else if (Input.GetKey(KeyCode.F))	
 		{
 			// Trigger the pose estimation filter
+            // FIXME : Not the right way to grab the keypress, here we get it several times in a row..
 			this.filteredPose = !this.filteredPose;
-
 		} 
 		else if (Input.GetKeyDown(KeyCode.S)) 
 		{
@@ -140,10 +152,12 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		}
 	}
 
-    private void checkGazeCollision(Vector3 screenPoint)
+	private bool checkGazeCollision(Vector3 screenPoint, out Vector3 hitPoint)
     {
         Ray collisionRay = cam.ScreenPointToRay(screenPoint);
         RaycastHit hit;
+		hitPoint = new Vector3();
+
         if (Physics.Raycast(collisionRay, out hit))
         {
             if (null != hit.collider && currentHit != hit.collider)
@@ -151,10 +165,16 @@ public class GazeCamera : MonoBehaviour, IGazeListener
                 //switch colors of cubes according to collision state
                 if (null != currentHit)
                     currentHit.renderer.material.color = Color.white;
-                currentHit = hit.collider;
+                
+				currentHit = hit.collider;
                 currentHit.renderer.material.color = Color.red;
+
+				hitPoint = hit.point;
+
+				return true;
             }
-        }
+		} 
+		return false;
     }
 
     void OnGUI()

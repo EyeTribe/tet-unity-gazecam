@@ -53,6 +53,9 @@ namespace Assets.Scripts
             Point2D gazeCoords = null;
             Point2D gazeCoordsSmooth = null;
             GazeData gd;
+			double maxInterEyesOnscreen = 0.6; // Physical max and min values (we take 10cm as min distance, 1m max)
+			double minInterEyesOnscreen = 0.06;
+
             for (int i = _Frames.Count; --i >= 0;) {
                 gd = _Frames.ElementAt (i);
 
@@ -64,7 +67,7 @@ namespace Assets.Scripts
                         && null != gd.LeftEye && gd.LeftEye.PupilCenterCoordinates.X != 0 && gd.LeftEye.PupilCenterCoordinates.Y != 0)
                     {
                         double newDistance  = Point2DDistance (_LastValidLeftEye, _LastValidRightEye);
-                        _LastValidInterEyes = Math.Max (Math.Min (newDistance, _MaximumEyesDistance), _MinimumEyesDistance);
+						_LastValidInterEyes = Math.Max (Math.Min (newDistance, maxInterEyesOnscreen), minInterEyesOnscreen);
                     }
 
                     // Valid left eye is found --> update

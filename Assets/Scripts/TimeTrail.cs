@@ -1,6 +1,6 @@
-# Author: Forest Johnson (Yoggy)
-# C# version by xyber from Unity Forums
-# see http://wiki.unity3d.com/index.php?title=TimeBasedTrailRenderer#C.23_-_TimeTrail.cs
+//Author: Forest Johnson (Yoggy)
+//C# version by xyber from Unity Forums
+//see http://wiki.unity3d.com/index.php?title=TimeBasedTrailRenderer#C.23_-_TimeTrail.cs
 
 using UnityEngine;
 using System.Collections;
