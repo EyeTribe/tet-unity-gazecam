@@ -41,10 +41,20 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
 		// Define the trail and the appropriate material
 		gazeTrail = new GameObject();
-		gazeTrail.AddComponent("TimedTrailRenderer");
-//		Material trailTexture = Resources.Load("dotcenter_trail.mat", typeof(Material)) as Material;
-//		gazeTrail.GetComponent<TimedTrailRenderer>().material = trailTexture;
-	            
+		gazeTrail.AddComponent<TrailRenderer>();
+		gazeTrail.GetComponent<TrailRenderer>().enabled = true;
+		gazeTrail.GetComponent<TrailRenderer>().material = Resources.Load("dotcenter_trail", typeof(Material)) as Material;
+		gazeTrail.GetComponent<TrailRenderer>().startWidth = 0.1F;
+		gazeTrail.GetComponent<TrailRenderer>().endWidth = 0.01F;
+
+//		gazeTrail.AddComponent<TimedTrailRenderer>();
+//		gazeTrail.GetComponent<TimedTrailRenderer>().enabled = true;
+//		gazeTrail.GetComponent<TimedTrailRenderer>().material = Resources.Load("dotcenter_trail", typeof(Material)) as Material;
+//		gazeTrail.GetComponent<TimedTrailRenderer>().sizes = new float[5]{0.1F, 0.1F, 0.05F, 0.03F, .01F};
+//		gazeTrail.GetComponent<TimedTrailRenderer>().minVertexDistance = 0.1F;
+//		gazeTrail.GetComponent<TimedTrailRenderer>().lifeTime = 10F;
+		
+
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
 		gazeUtils.setBaseDist(cam.transform.position.z); // Give the filtering framework the information about the cam pose
@@ -118,7 +128,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			Vector3 hitPoint;
 			if (checkGazeCollision(screenPoint, out hitPoint))
 			{
-//				gazeTrail.transform.position = hitPoint;
+				gazeTrail.transform.position = hitPoint;
 			}
 
         }
@@ -168,7 +178,6 @@ public class GazeCamera : MonoBehaviour, IGazeListener
                 
 				currentHit = hit.collider;
                 currentHit.renderer.material.color = Color.red;
-
 				hitPoint = hit.point;
 
 				return true;
