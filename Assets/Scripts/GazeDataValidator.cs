@@ -26,7 +26,6 @@ namespace Assets.Scripts
         private double _LastValidEyeDistance;
         private double _LastValidInterEyes;
         private double _LastValidEyeAngle;
-        private double _baseDist;
 
         // The head pose filtering stuff
         private MotionFilter filteredPoseLeftEye;
@@ -245,11 +244,6 @@ namespace Assets.Scripts
         public Point2D GetLastValidSmoothedGazeCoordinates ()
         {
             return _LastValidSmoothedGazeCoords;
-        }
-
-        public void setBaseDist (double baseDist)
-        {
-            _baseDist = baseDist;
         }
 
         public void setSmoothing(float smoothing) {

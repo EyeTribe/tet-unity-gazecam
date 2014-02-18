@@ -42,25 +42,14 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		// Define the trail and the appropriate material
 		gazeTrail = new GameObject();
 		gazeTrail.AddComponent<TrailRenderer>();
-		gazeTrail.GetComponent<TrailRenderer>().enabled = true;
+		gazeTrail.GetComponent<TrailRenderer>().enabled = false;
 		gazeTrail.GetComponent<TrailRenderer>().material = Resources.Load("dotcenter_trail", typeof(Material)) as Material;
 		gazeTrail.GetComponent<TrailRenderer>().startWidth = 0.1F;
 		gazeTrail.GetComponent<TrailRenderer>().endWidth = 0.01F;
 		gazeTrail.GetComponent<TrailRenderer>().time = 2F; // The length of the trail in seconds
-		
-
-//		gazeTrail.AddComponent<TimedTrailRenderer>();
-//		gazeTrail.GetComponent<TimedTrailRenderer>().enabled = true;
-//		gazeTrail.GetComponent<TimedTrailRenderer>().material = Resources.Load("dotcenter_trail", typeof(Material)) as Material;
-//		gazeTrail.GetComponent<TimedTrailRenderer>().sizes = new float[5]{0.1F, 0.1F, 0.05F, 0.03F, .01F};
-//		gazeTrail.GetComponent<TimedTrailRenderer>().minVertexDistance = 0.1F;
-//		gazeTrail.GetComponent<TimedTrailRenderer>().lifeTime = 10F;
-		
 
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
-		gazeUtils.setBaseDist(cam.transform.position.z); // Give the filtering framework the information about the cam pose
-
 		filteredPose = false;
         currentSmoothing = 1F;
 
@@ -144,10 +133,9 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		{
             Application.LoadLevel(0);
         } 
-		else if (Input.GetKey(KeyCode.F))	
+		else if (Input.GetKeyDown(KeyCode.F))	
 		{
 			// Trigger the pose estimation filter
-            // FIXME : Not the right way to grab the keypress, here we get it several times in a row..
 			this.filteredPose = !this.filteredPose;
 		} 
 		else if (Input.GetKeyDown(KeyCode.S)) 
@@ -162,8 +150,15 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 			currentSmoothing *= 0.9F;
             gazeUtils.setSmoothing(currentSmoothing);
 		}
+		else if (Input.GetKeyDown(KeyCode.T))
+		{
+			gazeTrail.GetComponent<TrailRenderer>().enabled = !gazeTrail.GetComponent<TrailRenderer>().enabled;
+		}
 	}
 
+	/// <summary>
+	/// Intersect the current gaze with the 3D model, and return the intersection coordinate.
+	/// </summary>
 	private bool checkGazeCollision(Vector3 screenPoint, out Vector3 hitPoint)
     {
         Ray collisionRay = cam.ScreenPointToRay(screenPoint);
