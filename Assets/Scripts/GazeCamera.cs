@@ -46,6 +46,8 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		gazeTrail.GetComponent<TrailRenderer>().material = Resources.Load("dotcenter_trail", typeof(Material)) as Material;
 		gazeTrail.GetComponent<TrailRenderer>().startWidth = 0.1F;
 		gazeTrail.GetComponent<TrailRenderer>().endWidth = 0.01F;
+		gazeTrail.GetComponent<TrailRenderer>().time = 2F; // The length of the trail in seconds
+		
 
 //		gazeTrail.AddComponent<TimedTrailRenderer>();
 //		gazeTrail.GetComponent<TimedTrailRenderer>().enabled = true;

@@ -18,8 +18,8 @@ namespace FilterUtils
 		// The motion filter constructor
 		public MotionFilter(double measurementAccuracy, double timeDilution) {
 			_measurementAccuracy 	= measurementAccuracy;
-			_timeDilution 			= timeDilution;
-			_dim					= 3;
+			_timeDilution 		= timeDilution;
+			_dim			= 3;
 			
 			// ------
 			// Define the matrices over there
