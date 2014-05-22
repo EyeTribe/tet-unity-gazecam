@@ -1,4 +1,12 @@
-﻿using UnityEngine;
+﻿/*
+ * Copyright (c) 2013-present, The Eye Tribe. 
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree. 
+ *
+ */
+
+using UnityEngine;
 using System.Collections;
 using TETCSharpClient;
 using TETCSharpClient.Data;
@@ -60,13 +68,13 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
 
         //initialising GazeData stabilizer
         gazeUtils = new GazeDataValidator(30);
-
-        //activate C# TET client
+		
+        //activate C# TET client, default port
         GazeManager.Instance.Activate
-            (
-                GazeManager.ApiVersion.VERSION_1_0,
-                GazeManager.ClientMode.Push
-            );
+        (
+            GazeManager.ApiVersion.VERSION_1_0,
+            GazeManager.ClientMode.Push
+        );
 
         //register for gaze updates
         GazeManager.Instance.AddGazeListener(this);
@@ -153,7 +161,7 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
         int btnWidth;
 
         int numBtns = 0;
-        if (!GazeManager.Instance.IsConnected)
+        if (!GazeManager.Instance.IsActivated)
             ++numBtns;
         if (!GazeManager.Instance.IsCalibrating)
             ++numBtns;
@@ -176,7 +184,7 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
             //add calibration rating if available
             if (GazeManager.Instance.IsCalibrated)
             {
-                y += 20;
+                y += 10;
 
                 string calibText;
                 int rating;
@@ -187,18 +195,18 @@ public class CalibCamera : MonoBehaviour, IGazeListener, ICalibrationProcessHand
 
             GUI.Box(new Rect(x, y, width, height), boxText);
 
-            if (!GazeManager.Instance.IsConnected)
+            if (!GazeManager.Instance.IsActivated)
             {
                 String btnText = "Reconnect to server";
 
                 if (GUI.Button(new Rect(x + btnPadding, y + btnPadding, btnWidth, btnHeight), btnText))
                 {
-                    //try to reactivate C# TET client
+                    //activate C# TET client, default port
                     GazeManager.Instance.Activate
-                        (
-                            GazeManager.ApiVersion.VERSION_1_0,
-                            GazeManager.ClientMode.Push
-                        );
+                    (
+                        GazeManager.ApiVersion.VERSION_1_0,
+                        GazeManager.ClientMode.Push
+                    );
                 }
 
                 y += (btnPadding + btnHeight);

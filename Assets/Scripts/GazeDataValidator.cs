@@ -1,16 +1,24 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2013-present, The Eye Tribe. 
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree. 
+ *
+ */
+
+using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TETCSharpClient.Data;
-using UnityEngine;
 
 namespace Assets.Scripts
 {
     /// <summary>
     /// Utility class that maintains a run-time cache of GazeData frames. Based on the cache 
     /// the class analyzes the frame history and finds the currently valid gaze data.
-    /// Use this class to avoid the 'glitch' effect of occasional poor tracking.
+    /// Use this class to avoid the 'glitch' effect of occational poor tracking.
     /// </summary>
     class GazeDataValidator
     {
@@ -20,7 +28,7 @@ namespace Assets.Scripts
         private FixedSizeQueue<GazeData> _Frames;
 
         private Eye _LastValidLeftEye;
-        private Eye _LastValidRightEye;
+        private Eye _LastValidRightEye ;
 
         private Point2D _LastValidRawGazeCoords;
         private Point2D _LastValidSmoothedGazeCoords;
@@ -66,7 +74,7 @@ namespace Assets.Scripts
 
                 // break loop if valid values found
                 if (null != right && null != left && null != gazeCoords)
-                    break;
+                    break;    
             }
 
             if (null != left)
@@ -110,7 +118,7 @@ namespace Assets.Scripts
 
         private double Point2DDistance(Eye ge1, Eye ge2)
         {
-            return Math.Abs(Math.Sqrt(Math.Pow(ge2.PupilCenterCoordinates.X - ge1.PupilCenterCoordinates.X, 2) + Math.Pow(ge2.PupilCenterCoordinates.Y - ge1.PupilCenterCoordinates.Y, 2)));
+            return Math.Abs( Math.Sqrt(Math.Pow(ge2.PupilCenterCoordinates.X - ge1.PupilCenterCoordinates.X, 2) + Math.Pow(ge2.PupilCenterCoordinates.Y - ge1.PupilCenterCoordinates.Y, 2)) );
         }
 
         public Point2D GetLastValidUserPosition()
