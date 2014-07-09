@@ -15,20 +15,20 @@ namespace Assets.Scripts
 	/// </summary>
 	class GazeDataValidator
 	{
-		private double _MinimumEyesDistance = 0.1f;
-		private double _MaximumEyesDistance = 0.3f;
+		protected double _MinimumEyesDistance = 0.1f;
+		protected double _MaximumEyesDistance = 0.3f;
 
-		private FixedSizeQueue<GazeData> _Frames;
+		protected FixedSizeQueue<GazeData> _Frames;
 
-		private Eye _LastValidLeftEye;
-		private Eye _LastValidRightEye ;
+		protected Eye _LastValidLeftEye;
+		protected Eye _LastValidRightEye;
 
-		private Point2D _LastValidRawGazeCoords;
-		private Point2D _LastValidSmoothedGazeCoords;
-		private Point2D _LastValidUserPosition;
+		protected Point2D _LastValidRawGazeCoords;
+		protected Point2D _LastValidSmoothedGazeCoords;
+		protected Point2D _LastValidUserPosition;
 
-		private double _LastValidEyeDistance;
-		private double _LastValidEyeAngle;
+		protected double _LastValidEyeDistance;
+		protected double _LastValidEyeAngle;
 
 		public GazeDataValidator(int queueLength)
 		{
@@ -109,7 +109,7 @@ namespace Assets.Scripts
 			}
 		}
 
-		private double Point2DDistance(Eye ge1, Eye ge2)
+		protected double Point2DDistance(Eye ge1, Eye ge2)
 		{
 			return Math.Abs( Math.Sqrt(Math.Pow(ge2.PupilCenterCoordinates.X - ge1.PupilCenterCoordinates.X, 2) + Math.Pow(ge2.PupilCenterCoordinates.Y - ge1.PupilCenterCoordinates.Y, 2)) );
 		}
@@ -156,12 +156,16 @@ namespace Assets.Scripts
 	/// </summary>
     class GazeDataValidatorFiltered : GazeDataValidator
     {
-        // The head pose filtering stuff
+		private double _LastValidInterEyes;
+		private double _LastValidEyeDistance;
+
+		// The head pose filtering stuff
         private MotionFilter filteredPoseLeftEye;
         private MotionFilter filteredPoseRightEye;
         private Vector3 _filteredHeadPose;
 
-		public GazeDataValidatorFiltered (int queueLength)
+
+		public GazeDataValidatorFiltered (int queueLength) : base (queueLength)
         {
             _Frames = new FixedSizeQueue<GazeData> (queueLength);
             _LastValidUserPosition = new Point2D ();

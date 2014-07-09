@@ -49,7 +49,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 		gazeTrail.GetComponent<TrailRenderer>().time = 2F; // The length of the trail in seconds
 
         //initialising GazeData stabilizer
-        gazeUtils = new GazeDataValidator(30);
+        gazeUtils = new GazeDataValidatorFiltered(30);
 		filteredPose = false;
         currentSmoothing = 1F;
 
