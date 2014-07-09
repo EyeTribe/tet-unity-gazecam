@@ -156,18 +156,6 @@ namespace Assets.Scripts
 	/// </summary>
     class GazeDataValidatorFiltered : GazeDataValidator
     {
-        private double _MinimumEyesDistance = 0.1f;
-        private double _MaximumEyesDistance = 0.3f;
-        private FixedSizeQueue<GazeData> _Frames;
-        private Eye _LastValidLeftEye;
-        private Eye _LastValidRightEye;
-        private Point2D _LastValidRawGazeCoords;
-        private Point2D _LastValidSmoothedGazeCoords;
-        private Point2D _LastValidUserPosition;
-        private double _LastValidEyeDistance;
-        private double _LastValidInterEyes;
-        private double _LastValidEyeAngle;
-
         // The head pose filtering stuff
         private MotionFilter filteredPoseLeftEye;
         private MotionFilter filteredPoseRightEye;
