@@ -28,7 +28,7 @@ public class GazeCamera : MonoBehaviour, IGazeListener
 
     private Collider currentHit;
 
-    private GazeDataValidator gazeUtils;
+	private GazeDataValidatorFiltered gazeUtils;
 		
 	void Start () 
     {
